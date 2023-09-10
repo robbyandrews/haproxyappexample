@@ -1,0 +1,49 @@
+global
+    log /dev/log local0
+    log /dev/log local1 notice
+    chroot /var/lib/haproxy
+    stats socket /run/haproxy/admin.socket mode 660 level admin
+    stats timeout 30s
+    user haproxy
+    group haproxy
+    daemon
+    maxconn 2048
+    tune.ssl.default-dh-param 2048
+defaults
+    log global
+    mode http
+    option httplog
+    option dontlognull
+    option forwardfor
+    option http-server-close
+frontend www-http
+    bind *:80
+    http-request add-header X-Forwarded-Port %[dst_port]
+    default_backend www-backend
+frontend www-https
+    bind *:443 ssl crt /etc/haproxy/certs/example.com.pem
+    http-request add-header X-Forwarded-Proto https if { ssl_fc }
+    acl letsencrypt-acl path_beg /.well-known/acme-challenge/
+    use_backend letsencrypt-backend if letsencrypt-acl
+    default_backend www-backend
+resolvers mydns
+   nameserver dns1 8.8.8.8:53
+   accepted_payload_size 8192
+backend www-backend
+    redirect scheme https if !{ ssl_fc }
+    mode http
+    option httpchk
+    cookie SERVER insert indirect nocache dynamic
+    dynamic-cookie-key mycookie
+    http-check send meth GET  uri /health
+    http-check expect string success
+    balance roundrobin
+    stick-table type ip size 200k expire 100m
+    stick on src
+    server-template backend 3 _backend._tcp.svc.ef2abee6-ccde-441e-b01f-8502c479af7c.us-central-1.cns.mnx.io check resolvers mydns init-addr none
+    stats enable
+    stats uri /haproxy?stats
+    stats realm Strictly\ Private
+    stats auth changeme:changeme
+backend letsencrypt-backend
+   server letsencrypt 127.0.0.1:54321

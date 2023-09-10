@@ -1,0 +1,25 @@
+---
+- hosts: all
+  gather_facts: yes
+  become: yes
+  tasks:
+      - name: Update the apt cache
+        shell: apt-get update
+
+      - name: Install dependencies 
+        shell: apt-get install -y ca-certificates curl gnupg
+
+      - name: Create Keyring Folder
+        shell: mkdir -p /etc/apt/keyrings
+
+      - name: Add Keyring to the folder
+        shell: curl -fsSL https://deb.nodesource.com/gpgkey/nodesource-repo.gpg.key | sudo gpg --dearmor -o /etc/apt/keyrings/nodesource.gpg
+
+      - name: Create deb repository
+        shell: echo "deb [signed-by=/etc/apt/keyrings/nodesource.gpg] https://deb.nodesource.com/node_20.x nodistro main" | sudo tee /etc/apt/sources.list.d/nodesource.list
+
+      - name: Update the apt cache again
+        shell: apt-get update
+
+      - name: Install nodejs 
+        shell: apt-get install nodejs -y
