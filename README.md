@@ -6,6 +6,10 @@ Included in this repository are commands to provision three instances, one for t
 
 The HAproxy configuration example includes a template for 3 backend servers so that after building the initial two, you can provision a third with the same tags and it will automatically be added to the available backend servers.
 
+## Supported Environments
+
+The scripts and commands in this repository were developed using macOS and Linux using the bash shell, Node.js, and Ansible with Python 3 and should work without modification in those environments. Windows may work with something such as Git Bash and/or Windows Subsystem for Linux but they have not been tested. When I have access to a Windows system I will update this.
+
 ## Triton CNS
 
 Triton CNS provides DNS resolution for instances provisioned in a Triton DataCenter installation. For more information please go to the [Github Page](https://github.com/TritonDataCenter/triton-cns) or [Triton Docs Container Name Service](https://docs.tritondatacenter.com/public-cloud/network/cns)
